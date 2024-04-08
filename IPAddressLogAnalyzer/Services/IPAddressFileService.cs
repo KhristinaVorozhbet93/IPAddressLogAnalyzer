@@ -7,13 +7,13 @@ namespace IPAddressLogAnalyzer.Services
 {
     public class IPAddressFileService : IIPAddressFileService
     {
-       /// <summary>
-       /// Метод, который парсит содержимое файла в списко IP-адрессов
-       /// </summary>
-       /// <param name="filePath">Путь к файлу</param>
-       /// <returns></returns>
-       /// <exception cref="FileNotFoundException">Исключение, если нужный файл по заданному пути не найден</exception>
-       /// <exception cref="ArgumentException"> Исключение, если в метод для параметра передается некорректное значение</exception>
+        /// <summary>
+        /// Метод, который парсит содержимое файла в списко IP-адрессов
+        /// </summary>
+        /// <param name="filePath">Путь к файлу</param>
+        /// <returns></returns>
+        /// <exception cref="FileNotFoundException">Исключение, если нужный файл по заданному пути не найден</exception>
+        /// <exception cref="ArgumentException"> Исключение, если в метод для параметра передается некорректное значение</exception>
         public async Task<List<IP>> ReadFromFileToListAsync(string filePath)
         {
             ArgumentException.ThrowIfNullOrEmpty(filePath);

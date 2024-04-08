@@ -46,5 +46,5 @@ class Program : Configuration
         {
             Console.WriteLine("Не удалось найти файл по заданному пути");
         }
-    } 
+    }
 }

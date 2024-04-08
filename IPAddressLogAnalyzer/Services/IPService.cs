@@ -51,7 +51,7 @@ public class IPService
         foreach (var ip in ipAddresses)
         {
             if (IsIPAddressInRange
-                (ip.Key, addressStart,addressMask))
+                (ip.Key, addressStart, addressMask))
             {
                 filteredIPAddresses.Add(ip.Key, ip.Value);
             }

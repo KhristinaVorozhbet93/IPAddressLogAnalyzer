@@ -6,6 +6,6 @@ namespace IPAddressLogAnalyzer.Interfaces
     public interface IIPAddressFileService
     {
         Task<List<IP>> ReadFromFileToListAsync(string filePath);
-        Task WriteToFileAsync(string filePath, Dictionary <IPAddress, int> ips);
+        Task WriteToFileAsync(string filePath, Dictionary<IPAddress, int> ips);
     }
 }
