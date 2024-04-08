@@ -5,6 +5,8 @@ VisualStudioVersion = 17.9.34714.143
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IPAddressLogAnalyzer", "IPAddressLogAnalyzer\IPAddressLogAnalyzer.csproj", "{43F74741-6431-4FD6-AB31-24AB0E0D6859}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IPAddressLogAnalyzer.Tests", "IPAddressLogAnalyzer.Tests\IPAddressLogAnalyzer.Tests.csproj", "{8687EBBD-B4E4-436C-934D-8F2CDFEF7074}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{43F74741-6431-4FD6-AB31-24AB0E0D6859}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{43F74741-6431-4FD6-AB31-24AB0E0D6859}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{43F74741-6431-4FD6-AB31-24AB0E0D6859}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8687EBBD-B4E4-436C-934D-8F2CDFEF7074}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8687EBBD-B4E4-436C-934D-8F2CDFEF7074}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8687EBBD-B4E4-436C-934D-8F2CDFEF7074}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8687EBBD-B4E4-436C-934D-8F2CDFEF7074}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
