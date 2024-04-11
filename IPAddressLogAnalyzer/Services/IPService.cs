@@ -91,13 +91,25 @@ public class IPService
         byte[] ipBytes = ipAddress.GetAddressBytes();
         byte[] startBytes = addressStart.GetAddressBytes();
         byte[] maskBytes = addressMask.GetAddressBytes();
+
+        if (ipBytes.Length != startBytes.Length || startBytes.Length != maskBytes.Length)
+        {
+            return false; 
+        }
+
         for (int i = 0; i < ipBytes.Length; i++)
         {
-            if ((ipBytes[i] & maskBytes[i]) != (startBytes[i] & maskBytes[i]))
+            if ((ipBytes[i] & maskBytes[i]) < (startBytes[i] & maskBytes[i]))
             {
-                return false;
+                return false; 
+            }
+
+            if ((ipBytes[i] & maskBytes[i]) > ((startBytes[i] & maskBytes[i]) + (255 - maskBytes[i])))
+            {
+                return false; 
             }
         }
+
         return true;
     }
 }
