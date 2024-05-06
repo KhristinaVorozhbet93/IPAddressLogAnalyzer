@@ -42,7 +42,7 @@ class Program
             .BuildServiceProvider();
 
 
-        //кофигурационный файл, командная строка переменные среды окружения
+        //кофигурационный файл, командная строка, переменные среды окружения
         var ipServiceS = serviceProvider.GetRequiredService<IConfigurationsProvider>();
         var ipConfiguration = ipServiceS.GetIPConfiguration();
 

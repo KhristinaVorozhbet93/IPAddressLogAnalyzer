@@ -1,5 +1,8 @@
 ﻿using FluentAssertions;
+using IPAddressLogAnalyzer.Configurations;
+using IPAddressLogAnalyzer.Configurations.Intefaces;
 using Microsoft.Extensions.Configuration;
+using Moq;
 
 namespace IPAddressLogAnalyzer.Tests
 {
@@ -12,11 +15,13 @@ namespace IPAddressLogAnalyzer.Tests
                 ["--file-log", "assests/FileLog.txt", "--file-output",
                 "assests/OutputApis.txt", "--time-start", "2024-10-14", "23:59:06", "--time-end", "2024-10-14", "23:59:07",
                 "--address-start", "", "--address-mask", ""];
-            EnvironmentConfigurationsProvider config = new EnvironmentConfigurationsProvider();
 
             FluentActions.Invoking(() =>
             {
-                var ipConfig = config.GetIPConfiguration(args);
+                var parser = new Mock<IConfigurationParser>();
+                CommandLineConfigurationsProvider commandLineConfigurationsProvider =
+                    new CommandLineConfigurationsProvider(args, parser.Object);
+                commandLineConfigurationsProvider.GetIPConfiguration();
             })
                .Should()
                .NotThrow();
@@ -52,10 +57,13 @@ namespace IPAddressLogAnalyzer.Tests
 
         public void Configurations_creatioin_from_command_prompt_with_incorrect_props_is_rejected(string[] args)
         {
-            EnvironmentConfigurationsProvider config = new EnvironmentConfigurationsProvider();
-
-            FluentActions.Invoking(() => { 
-                var ipConfig = config.GetIPConfiguration(args); })
+            FluentActions.Invoking(() =>
+            {
+                var parser = new Mock<IConfigurationParser>();
+                CommandLineConfigurationsProvider commandLineConfigurationsProvider =
+                    new CommandLineConfigurationsProvider(args, parser.Object);
+                commandLineConfigurationsProvider.GetIPConfiguration();
+            })
                 .Should()
                 .Throw<ArgumentException>();
         }
@@ -75,10 +83,12 @@ namespace IPAddressLogAnalyzer.Tests
         }])]
         public void Configurations_creatioin_from_command_prompt_with_incorrect_date_time_is_rejected(string[] args)
         {
-            EnvironmentConfigurationsProvider config = new EnvironmentConfigurationsProvider();
-
-            FluentActions.Invoking(() => {
-                var ipConfig = config.GetIPConfiguration(args);
+            FluentActions.Invoking(() =>
+            {
+                var parser = new ConfigurationParser();
+                CommandLineConfigurationsProvider commandLineConfigurationsProvider =
+                    new CommandLineConfigurationsProvider(args, parser);
+                commandLineConfigurationsProvider.GetIPConfiguration();
             })
                 .Should()
                 .Throw<FormatException>();
@@ -93,20 +103,20 @@ namespace IPAddressLogAnalyzer.Tests
             var configuration = builder.Build();
             var ipConfigSection = configuration
                 .GetRequiredSection("IPConfiguration");
-            EnvironmentConfigurationsProvider config = new EnvironmentConfigurationsProvider();
 
-            
             FluentActions.Invoking(() =>
             {
-                config.GetIPConfigurationFromConfigurationFile(ipConfigSection);
-
+                var parser = new Mock<IConfigurationParser>();
+                FileConfigurationsProvider fileConfigurationProvider =
+                    new FileConfigurationsProvider(ipConfigSection, parser.Object);
+                fileConfigurationProvider.GetIPConfiguration();
             })
                .Should()
                .NotThrow();
         }
 
         [Theory]
-        [InlineData ("file_log", "")]
+        [InlineData("file_log", "")]
         [InlineData("file_output", "")]
         [InlineData("time_start", "")]
         [InlineData("time_end", "")]
@@ -120,11 +130,13 @@ namespace IPAddressLogAnalyzer.Tests
                 .GetRequiredSection("IPConfiguration");
             ipConfigSection[section] = value;
 
-            EnvironmentConfigurationsProvider config = new EnvironmentConfigurationsProvider();
-
             FluentActions.Invoking(() =>
             {
-                config.GetIPConfigurationFromConfigurationFile(ipConfigSection);})
+                var parser = new Mock<IConfigurationParser>();
+                FileConfigurationsProvider fileConfigurationProvider =
+                    new FileConfigurationsProvider(ipConfigSection, parser.Object);
+                fileConfigurationProvider.GetIPConfiguration();
+            })
                .Should()
                 .Throw<ArgumentException>();
         }
