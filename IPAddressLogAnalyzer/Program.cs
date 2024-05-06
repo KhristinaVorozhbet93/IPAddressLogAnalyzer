@@ -43,7 +43,6 @@ class Program
             })
             .AddScoped<IPService>()
             .BuildServiceProvider();
-        var ipService = serviceProvider.GetRequiredService<IPService>();
 
         //кофигурационный файл
         var ipServiceS = serviceProvider.GetRequiredService<FileConfigurationsProvider>();
@@ -57,9 +56,13 @@ class Program
         //var ipServiceS = serviceProvider.GetRequiredService<EnvironmentConfigurationsProvider>();
         //var ipConfiguration = ipServiceS.GetIPConfiguration();
 
+        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+        CancellationToken cancellationToken = cancellationTokenSource.Token;
+
+        var ipService = serviceProvider.GetRequiredService<IPService>();
         await ipService.WriteIPAddressesWithConfigurationsToFile
             (ipConfiguration.FileLog, ipConfiguration.FileOutput, ipConfiguration.TimeStart,
-            ipConfiguration.TimeEnd, ipConfiguration.AddressStart, ipConfiguration.AddressMask);
+            ipConfiguration.TimeEnd, ipConfiguration.AddressStart, ipConfiguration.AddressMask, cancellationToken);
         Console.WriteLine("IP-адреса с заданными конфигурациями успешно записаны в файл");
     }
 }

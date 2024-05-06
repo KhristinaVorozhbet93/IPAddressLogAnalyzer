@@ -20,12 +20,12 @@ public class IPService
     /// Метод, который считывает IP-адреса с файла журнала, применяет к IP-адресам заданные парамеры и записывает IP-адреса в новый файл
     /// </summary>
     public async virtual Task WriteIPAddressesWithConfigurationsToFile
-        (string fileLog, string fileOutput, DateTime timeStart, DateTime timeEnd, string? addressStart, string? addressMask)
+        (string fileLog, string fileOutput, DateTime timeStart, DateTime timeEnd, string? addressStart, string? addressMask, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(nameof(fileLog));
         ArgumentException.ThrowIfNullOrWhiteSpace(nameof(fileOutput));
 
-        var ipAddresses = await _iPFileReaderService.ReadFromFileToListAsync(fileLog);
+        var ipAddresses = await _iPFileReaderService.ReadFromFileToListAsync(fileLog, cancellationToken);
 
         ipAddresses.Sort();
         var timeAddresses = GetIPAddressesInTimeInterval(ipAddresses, timeStart, timeEnd);
@@ -36,10 +36,10 @@ public class IPService
         {
             var filtredAddresses = GetRangeIPAddresses
                 (countTimeRequestIPAddresses, IPAddress.Parse(addressStart), IPAddress.Parse(addressMask));
-            await _iPFileWriterService.WriteToFileAsync(fileOutput, filtredAddresses);
+            await _iPFileWriterService.WriteToFileAsync(fileOutput, filtredAddresses, cancellationToken);
             return;
         }
-        await _iPFileWriterService.WriteToFileAsync(fileOutput, countTimeRequestIPAddresses);
+        await _iPFileWriterService.WriteToFileAsync(fileOutput, countTimeRequestIPAddresses, cancellationToken);
     }
 
     /// <summary>
