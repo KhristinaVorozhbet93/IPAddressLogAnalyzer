@@ -12,11 +12,11 @@ namespace IPAddressLogAnalyzer.Tests
                 ["--file-log", "assests/FileLog.txt", "--file-output",
                 "assests/OutputApis.txt", "--time-start", "2024-10-14", "23:59:06", "--time-end", "2024-10-14", "23:59:07",
                 "--address-start", "", "--address-mask", ""];
-            Configuration config = new Configuration();
+            EnvironmentConfigurationsProvider config = new EnvironmentConfigurationsProvider();
 
             FluentActions.Invoking(() =>
             {
-                var ipConfig = config.GetIPConfigurationFromCommandPrompt(args);
+                var ipConfig = config.GetIPConfiguration(args);
             })
                .Should()
                .NotThrow();
@@ -52,10 +52,10 @@ namespace IPAddressLogAnalyzer.Tests
 
         public void Configurations_creatioin_from_command_prompt_with_incorrect_props_is_rejected(string[] args)
         {
-            Configuration config = new Configuration();
+            EnvironmentConfigurationsProvider config = new EnvironmentConfigurationsProvider();
 
             FluentActions.Invoking(() => { 
-                var ipConfig = config.GetIPConfigurationFromCommandPrompt(args); })
+                var ipConfig = config.GetIPConfiguration(args); })
                 .Should()
                 .Throw<ArgumentException>();
         }
@@ -75,10 +75,10 @@ namespace IPAddressLogAnalyzer.Tests
         }])]
         public void Configurations_creatioin_from_command_prompt_with_incorrect_date_time_is_rejected(string[] args)
         {
-            Configuration config = new Configuration();
+            EnvironmentConfigurationsProvider config = new EnvironmentConfigurationsProvider();
 
             FluentActions.Invoking(() => {
-                var ipConfig = config.GetIPConfigurationFromCommandPrompt(args);
+                var ipConfig = config.GetIPConfiguration(args);
             })
                 .Should()
                 .Throw<FormatException>();
@@ -93,7 +93,7 @@ namespace IPAddressLogAnalyzer.Tests
             var configuration = builder.Build();
             var ipConfigSection = configuration
                 .GetRequiredSection("IPConfiguration");
-            Configuration config = new Configuration();
+            EnvironmentConfigurationsProvider config = new EnvironmentConfigurationsProvider();
 
             
             FluentActions.Invoking(() =>
@@ -120,7 +120,7 @@ namespace IPAddressLogAnalyzer.Tests
                 .GetRequiredSection("IPConfiguration");
             ipConfigSection[section] = value;
 
-            Configuration config = new Configuration();
+            EnvironmentConfigurationsProvider config = new EnvironmentConfigurationsProvider();
 
             FluentActions.Invoking(() =>
             {

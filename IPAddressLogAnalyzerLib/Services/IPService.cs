@@ -1,41 +1,45 @@
-﻿using IPAddressLogAnalyzer;
-using IPAddressLogAnalyzer.Entities;
+﻿using IPAddressLogAnalyzer.Entities;
 using IPAddressLogAnalyzer.Interfaces;
 using System.Net;
 
 public class IPService
 {
-    private readonly IIPAddressFileService _iPFilesService;
-    private readonly IPConfiguration _configuration;
+    private readonly IIPAddressFileWriterService _iPFileWriterService;
+    private readonly IIPAddressFileReaderService _iPFileReaderService;
 
-    public IPService(IIPAddressFileService iPFilesService, IPConfiguration configuration)
+    public IPService(IIPAddressFileWriterService iPFileWriterService,
+        IIPAddressFileReaderService iPFileReaderService)
     {
-        ArgumentNullException.ThrowIfNull(nameof(iPFilesService));
-        ArgumentNullException.ThrowIfNull(nameof(configuration));
-        _iPFilesService = iPFilesService;
-        _configuration = configuration;
+        ArgumentNullException.ThrowIfNull(nameof(iPFileWriterService));
+        ArgumentNullException.ThrowIfNull(nameof(iPFileReaderService));
+        _iPFileWriterService = iPFileWriterService;
+        _iPFileReaderService = iPFileReaderService;
     }
 
     /// <summary>
     /// Метод, который считывает IP-адреса с файла журнала, применяет к IP-адресам заданные парамеры и записывает IP-адреса в новый файл
     /// </summary>
-    public async virtual Task WriteIPAddressesWithConfigurationsToFile()
+    public async virtual Task WriteIPAddressesWithConfigurationsToFile
+        (string fileLog, string fileOutput, DateTime timeStart, DateTime timeEnd, string? addressStart, string? addressMask)
     {
-        var ipAddresses = await _iPFilesService.ReadFromFileToListAsync(_configuration.FileLog);
+        ArgumentException.ThrowIfNullOrWhiteSpace(nameof(fileLog));
+        ArgumentException.ThrowIfNullOrWhiteSpace(nameof(fileOutput));
+
+        var ipAddresses = await _iPFileReaderService.ReadFromFileToListAsync(fileLog);
 
         ipAddresses.Sort();
-        var timeAddresses = GetIPAddressesInTimeInterval(ipAddresses, _configuration.TimeStart, _configuration.TimeEnd);
+        var timeAddresses = GetIPAddressesInTimeInterval(ipAddresses, timeStart, timeEnd);
 
         var countTimeRequestIPAddresses = GetIPAddressesWithCountTimeRequests(timeAddresses);
 
-        if (!string.IsNullOrEmpty(_configuration.AddressStart) && !string.IsNullOrEmpty(_configuration.AddressMask))
+        if (!string.IsNullOrEmpty(addressStart) && !string.IsNullOrEmpty(addressMask))
         {
             var filtredAddresses = GetRangeIPAddresses
-                (countTimeRequestIPAddresses, IPAddress.Parse(_configuration.AddressStart), IPAddress.Parse(_configuration.AddressMask));
-            await _iPFilesService.WriteToFileAsync(_configuration.FileOutput, filtredAddresses);
+                (countTimeRequestIPAddresses, IPAddress.Parse(addressStart), IPAddress.Parse(addressMask));
+            await _iPFileWriterService.WriteToFileAsync(fileOutput, filtredAddresses);
             return;
         }
-        await _iPFilesService.WriteToFileAsync(_configuration.FileOutput, countTimeRequestIPAddresses);
+        await _iPFileWriterService.WriteToFileAsync(fileOutput, countTimeRequestIPAddresses);
     }
 
     /// <summary>
@@ -45,7 +49,7 @@ public class IPService
     /// <param name="addressStart">Нижняя граница диапазона адресов</param>
     /// <param name="addressMask">Маска подсети, задающая верхнюю границу диапазона</param>
     /// <returns>Возвращает словарь IP-адресов с примененными конфигурациями, где key - IpAddress, value - количество обращений с данного адреса</returns>
-    public Dictionary<IPAddress, int> GetRangeIPAddresses(Dictionary<IPAddress, int> ipAddresses, IPAddress addressStart, IPAddress addressMask)
+    public virtual Dictionary<IPAddress, int> GetRangeIPAddresses(Dictionary<IPAddress, int> ipAddresses, IPAddress addressStart, IPAddress addressMask)
     {
         Dictionary<IPAddress, int> filteredIPAddresses = new Dictionary<IPAddress, int>();
         foreach (var ip in ipAddresses)
@@ -66,7 +70,7 @@ public class IPService
     /// <param name="timeStart">Дата и время начала</param>
     /// <param name="timeEnd">Дата и время окончания</param>
     /// <returns>Возвращает список IP-адресов с примененными конфигурациями</returns>
-    public List<IP> GetIPAddressesInTimeInterval(List<IP> ipAddresses, DateTime timeStart, DateTime timeEnd)
+    public virtual List<IP> GetIPAddressesInTimeInterval(List<IP> ipAddresses, DateTime timeStart, DateTime timeEnd)
     {
         return ipAddresses.Where(ip =>
                 ip.TimeRequest <= timeEnd &&
@@ -79,7 +83,7 @@ public class IPService
     /// </summary>
     /// <param name="ipAddresses">Список IP-адресов, в которых нужно осуществить фильтрацию по заданным параметрам</param>
     /// <returns>Возвращает словарь IP-адресов с примененными конфигурациями, где key - IpAddress, value - количество обращений с данного адреса</returns>
-    public Dictionary<IPAddress, int> GetIPAddressesWithCountTimeRequests(List<IP> ipAddresses)
+    public virtual Dictionary<IPAddress, int> GetIPAddressesWithCountTimeRequests(List<IP> ipAddresses)
     {
         return ipAddresses
                 .GroupBy(ip => ip.Address)
