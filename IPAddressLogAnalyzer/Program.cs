@@ -5,7 +5,7 @@ using IPAddressLogAnalyzer.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-class Program 
+class Program
 {
     static async Task Main(string[] args)
     {
@@ -27,34 +27,24 @@ class Program
         {
             throw new InvalidOperationException("IpConfig не заданы");
         }
-      
+
         var serviceProvider = new ServiceCollection()
             .AddScoped<IIPAddressFileWriterService, IPAddressFileWriterService>()
             .AddScoped<IIPAddressFileReaderService, IPAddressFileReaderService>()
-            .AddScoped<IConfigurationsProvider, EnvironmentConfigurationsProvider>()
             .AddScoped<IConfigurationParser, ConfigurationParser>()
             .AddScoped<IConfigurationsProvider>(provider =>
-            {
-                return new FileConfigurationsProvider(ipConfigSection, provider.GetRequiredService<IConfigurationParser>());
-            })
-            .AddScoped<IConfigurationsProvider>(provider =>
-            {
-                return new CommandLineConfigurationsProvider(args, provider.GetRequiredService<IConfigurationParser>());
-            })
+                  new FileConfigurationsProvider(ipConfigSection, provider.GetRequiredService<IConfigurationParser>()))
+            //.AddScoped<IConfigurationsProvider>(provider =>
+            //      new CommandLineConfigurationsProvider(args, provider.GetRequiredService<IConfigurationParser>()))
+            // .AddScoped<IConfigurationsProvider>(provider =>
+            //      new EnvironmentConfigurationsProvider(provider.GetRequiredService<IConfigurationParser>()))
             .AddScoped<IPService>()
             .BuildServiceProvider();
 
-        //кофигурационный файл
-        var ipServiceS = serviceProvider.GetRequiredService<FileConfigurationsProvider>();
+
+        //кофигурационный файл, командная строка переменные среды окружения
+        var ipServiceS = serviceProvider.GetRequiredService<IConfigurationsProvider>();
         var ipConfiguration = ipServiceS.GetIPConfiguration();
-
-        //командная строка
-        //var ipServiceS = serviceProvider.GetRequiredService<CommandLineConfigurationsProvider>();
-        //var ipConfiguration = ipServiceS.GetIPConfiguration();
-
-        //переменные среды окружения
-        //var ipServiceS = serviceProvider.GetRequiredService<EnvironmentConfigurationsProvider>();
-        //var ipConfiguration = ipServiceS.GetIPConfiguration();
 
         CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         CancellationToken cancellationToken = cancellationTokenSource.Token;
