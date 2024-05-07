@@ -3,14 +3,20 @@ using System.Net;
 
 namespace IPAddressLogAnalyzer.Services
 {
-    public class IPAddressFileWriterService : IIPAddressFileWriterService
+    public class IPAddressFileWriterService : IIPAddressWriterService
     {
-        public async Task WriteToFileAsync
-            (string filePath, Dictionary<IPAddress, int> ips, CancellationToken cancellationToken)
+        private readonly string _filePath;
+        public IPAddressFileWriterService(string filePath)
         {
-            ArgumentException.ThrowIfNullOrEmpty(filePath);
+            ArgumentException.ThrowIfNullOrWhiteSpace(nameof(filePath));
+            _filePath = filePath;
+        }
+        public async Task WriteAsync
+            (Dictionary<IPAddress, int> ips, CancellationToken cancellationToken)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(_filePath);
             ArgumentNullException.ThrowIfNull(ips);
-            using StreamWriter writer = new(filePath, false);
+            using StreamWriter writer = new(_filePath, false);
             foreach (var ip in ips)
             {
                 await writer.WriteLineAsync($"{ip.Key} {ip.Value}".ToCharArray(), cancellationToken);

@@ -4,11 +4,11 @@ using System.Net;
 
 public class IPService
 {
-    private readonly IIPAddressFileWriterService _iPFileWriterService;
-    private readonly IIPAddressFileReaderService _iPFileReaderService;
+    private readonly IIPAddressWriterService _iPFileWriterService;
+    private readonly IIPAddressReaderService _iPFileReaderService;
 
-    public IPService(IIPAddressFileWriterService iPFileWriterService,
-        IIPAddressFileReaderService iPFileReaderService)
+    public IPService(IIPAddressWriterService iPFileWriterService,
+        IIPAddressReaderService iPFileReaderService)
     {
         ArgumentNullException.ThrowIfNull(nameof(iPFileWriterService));
         ArgumentNullException.ThrowIfNull(nameof(iPFileReaderService));
@@ -20,12 +20,9 @@ public class IPService
     /// Метод, который считывает IP-адреса с файла журнала, применяет к IP-адресам заданные парамеры и записывает IP-адреса в новый файл
     /// </summary>
     public async virtual Task WriteIPAddressesWithConfigurationsToFile
-        (string fileLog, string fileOutput, DateTime timeStart, DateTime timeEnd, string? addressStart, string? addressMask, CancellationToken cancellationToken)
+        (DateTime timeStart, DateTime timeEnd, string? addressStart, string? addressMask, CancellationToken cancellationToken)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(nameof(fileLog));
-        ArgumentException.ThrowIfNullOrWhiteSpace(nameof(fileOutput));
-
-        var ipAddresses = await _iPFileReaderService.ReadFromFileToListAsync(fileLog, cancellationToken);
+        var ipAddresses = await _iPFileReaderService.ReadToListAsync(cancellationToken);
 
         ipAddresses.Sort();
         var timeAddresses = GetIPAddressesInTimeInterval(ipAddresses, timeStart, timeEnd);
@@ -36,10 +33,10 @@ public class IPService
         {
             var filtredAddresses = GetRangeIPAddresses
                 (countTimeRequestIPAddresses, IPAddress.Parse(addressStart), IPAddress.Parse(addressMask));
-            await _iPFileWriterService.WriteToFileAsync(fileOutput, filtredAddresses, cancellationToken);
+            await _iPFileWriterService.WriteAsync(filtredAddresses, cancellationToken);
             return;
         }
-        await _iPFileWriterService.WriteToFileAsync(fileOutput, countTimeRequestIPAddresses, cancellationToken);
+        await _iPFileWriterService.WriteAsync(countTimeRequestIPAddresses, cancellationToken);
     }
 
     /// <summary>

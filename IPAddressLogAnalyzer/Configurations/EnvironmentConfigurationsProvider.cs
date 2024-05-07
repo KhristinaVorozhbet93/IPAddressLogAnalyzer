@@ -1,4 +1,5 @@
-﻿using IPAddressLogAnalyzer.Configurations.Intefaces;
+﻿using IPAddressLogAnalyzer;
+using IPAddressLogAnalyzer.Configurations.Intefaces;
 
 public class EnvironmentConfigurationsProvider : IConfigurationsProvider 
 {

@@ -14,7 +14,6 @@ namespace IPAddressLogAnalyzer.Configurations
             ArgumentException.ThrowIfNullOrEmpty(nameof(configurationParser));
             _ipConfigurationSection = ipConfigSection;
             _configurationParser = configurationParser;
-
         }
         /// <summary>
         /// Метод, который получает параметры через конфигурационный файл 

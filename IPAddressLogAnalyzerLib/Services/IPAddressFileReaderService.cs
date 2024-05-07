@@ -5,28 +5,34 @@ using System.Net;
 
 namespace IPAddressLogAnalyzer.Services
 {
-    public class IPAddressFileReaderService : IIPAddressFileReaderService
+    public class IPAddressFileReaderService : IIPAddressReaderService
     {
+        private readonly string _filePath;
+        public IPAddressFileReaderService(string filePath)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(nameof(filePath));
+            _filePath = filePath;
+        }
         /// <summary>
         /// Метод, который парсит содержимое файла в список IP-адрессов
         /// </summary>
-        /// <param name="filePath">Путь к файлу</param>
+        /// <param name="_filePath">Путь к файлу</param>
         /// <returns></returns>
         /// <exception cref="FileNotFoundException">Исключение, если нужный файл по заданному пути не найден</exception>
         /// <exception cref="ArgumentException"> Исключение, если в метод для параметра передается некорректное значение</exception>
-        public async Task<List<IP>> ReadFromFileToListAsync(string filePath, CancellationToken cancellationToken)
+        public async Task<List<IP>> ReadToListAsync(CancellationToken cancellationToken)
         {
-            ArgumentException.ThrowIfNullOrEmpty(filePath);
+            ArgumentException.ThrowIfNullOrEmpty(_filePath);
 
-            if (!File.Exists(filePath))
+            if (!File.Exists(_filePath))
             {
                 throw new FileNotFoundException
-                    ($"Файл по заданному пути не обнаружен: {filePath}");
+                    ($"Файл по заданному пути не обнаружен: {_filePath}");
             }
 
             List<IP> ips = new List<IP>();
             CultureInfo provider = new CultureInfo("ru-RU");
-            using (StreamReader reader = new StreamReader(filePath))
+            using (StreamReader reader = new StreamReader(_filePath))
             {
                 string? line;
                 while ((line = await reader.ReadLineAsync(cancellationToken)) != null)
@@ -40,7 +46,7 @@ namespace IPAddressLogAnalyzer.Services
                 }
                 return ips;
             }
-            throw new ArgumentException($"Не удалось найти файл: {filePath}");
-        }     
+            throw new ArgumentException($"Не удалось найти файл: {_filePath}");
+        }
     }
 }

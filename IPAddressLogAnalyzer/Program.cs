@@ -29,11 +29,22 @@ class Program
         }
 
         var serviceProvider = new ServiceCollection()
-            .AddScoped<IIPAddressFileWriterService, IPAddressFileWriterService>()
-            .AddScoped<IIPAddressFileReaderService, IPAddressFileReaderService>()
-            .AddScoped<IConfigurationParser, ConfigurationParser>()
+             .AddScoped<IConfigurationParser, ConfigurationParser>()
             .AddScoped<IConfigurationsProvider>(provider =>
                   new FileConfigurationsProvider(ipConfigSection, provider.GetRequiredService<IConfigurationParser>()))
+            .AddScoped<IIPAddressWriterService>(provider =>
+            {
+                var ipServiceS = provider.GetRequiredService<IConfigurationsProvider>();
+                var ipConfiguration = ipServiceS.GetIPConfiguration();
+                return new IPAddressFileWriterService(ipConfiguration.FileOutput);
+
+            })
+            .AddScoped<IIPAddressReaderService>(provider =>
+            {
+                var ipServiceS = provider.GetRequiredService<IConfigurationsProvider>();
+                var ipConfiguration = ipServiceS.GetIPConfiguration();
+                return new IPAddressFileReaderService(ipConfiguration.FileLog);
+            })
             //.AddScoped<IConfigurationsProvider>(provider =>
             //      new CommandLineConfigurationsProvider(args, provider.GetRequiredService<IConfigurationParser>()))
             // .AddScoped<IConfigurationsProvider>(provider =>
@@ -51,8 +62,7 @@ class Program
 
         var ipService = serviceProvider.GetRequiredService<IPService>();
         await ipService.WriteIPAddressesWithConfigurationsToFile
-            (ipConfiguration.FileLog, ipConfiguration.FileOutput, ipConfiguration.TimeStart,
-            ipConfiguration.TimeEnd, ipConfiguration.AddressStart, ipConfiguration.AddressMask, cancellationToken);
+            (ipConfiguration.TimeStart, ipConfiguration.TimeEnd, ipConfiguration.AddressStart, ipConfiguration.AddressMask, cancellationToken);
         Console.WriteLine("IP-адреса с заданными конфигурациями успешно записаны в файл");
     }
 }
