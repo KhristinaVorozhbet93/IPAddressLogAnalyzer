@@ -35,7 +35,7 @@ namespace IPAddressLogAnalyzer.Tests
         {
             Dictionary<string, string> ips = new Dictionary<string, string>();
 
-            await _ipService.WriteIPAddressesWithConfigurationsToFile
+            await _ipService.WriteIPAddressesWithConfigurations
                 (_ipConfiguration.TimeStart, 
                 _ipConfiguration.TimeEnd, _ipConfiguration.AddressStart, _ipConfiguration.AddressMask, default);
             using (StreamReader reader = new StreamReader(_ipConfiguration.FileOutput))

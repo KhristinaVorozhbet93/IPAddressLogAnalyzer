@@ -19,7 +19,7 @@ public class IPService
     /// <summary>
     /// Метод, который считывает IP-адреса с файла журнала, применяет к IP-адресам заданные парамеры и записывает IP-адреса в новый файл
     /// </summary>
-    public async virtual Task WriteIPAddressesWithConfigurationsToFile
+    public async virtual Task WriteIPAddressesWithConfigurations
         (DateTime timeStart, DateTime timeEnd, string? addressStart, string? addressMask, CancellationToken cancellationToken)
     {
         var ipAddresses = await _iPFileReaderService.ReadToListAsync(cancellationToken);

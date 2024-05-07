@@ -29,15 +29,14 @@ class Program
         }
 
         var serviceProvider = new ServiceCollection()
-             .AddScoped<IConfigurationParser, ConfigurationParser>()
+            .AddScoped<IConfigurationParser, ConfigurationParser>()
             .AddScoped<IConfigurationsProvider>(provider =>
-                  new FileConfigurationsProvider(ipConfigSection, provider.GetRequiredService<IConfigurationParser>()))
+                new FileConfigurationsProvider(ipConfigSection, provider.GetRequiredService<IConfigurationParser>()))
             .AddScoped<IIPAddressWriterService>(provider =>
             {
                 var ipServiceS = provider.GetRequiredService<IConfigurationsProvider>();
                 var ipConfiguration = ipServiceS.GetIPConfiguration();
                 return new IPAddressFileWriterService(ipConfiguration.FileOutput);
-
             })
             .AddScoped<IIPAddressReaderService>(provider =>
             {
@@ -61,7 +60,7 @@ class Program
         CancellationToken cancellationToken = cancellationTokenSource.Token;
 
         var ipService = serviceProvider.GetRequiredService<IPService>();
-        await ipService.WriteIPAddressesWithConfigurationsToFile
+        await ipService.WriteIPAddressesWithConfigurations
             (ipConfiguration.TimeStart, ipConfiguration.TimeEnd, ipConfiguration.AddressStart, ipConfiguration.AddressMask, cancellationToken);
         Console.WriteLine("IP-адреса с заданными конфигурациями успешно записаны в файл");
     }
