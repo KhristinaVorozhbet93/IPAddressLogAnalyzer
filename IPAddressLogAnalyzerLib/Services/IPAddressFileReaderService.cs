@@ -1,5 +1,6 @@
 ﻿using IPAddressLogAnalyzer.Entities;
 using IPAddressLogAnalyzer.Interfaces;
+using IPAddressLogAnalyzer.Lib.Interfaces;
 using System.Globalization;
 using System.Net;
 
@@ -7,11 +8,15 @@ namespace IPAddressLogAnalyzer.Services
 {
     public class IPAddressFileReaderService : IIPAddressReaderService
     {
+        private readonly IIPAddressFilterService _iPAddressFilterService;
         private readonly string _filePath;
-        public IPAddressFileReaderService(string filePath)
+        public IPAddressFileReaderService(string filePath,
+            IIPAddressFilterService iPAddressFilterService)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(nameof(filePath));
+            ArgumentException.ThrowIfNullOrWhiteSpace(nameof(iPAddressFilterService));
             _filePath = filePath;
+            _iPAddressFilterService = iPAddressFilterService;   
         }
         /// <summary>
         /// Метод, который парсит содержимое файла в список IP-адрессов
@@ -20,7 +25,7 @@ namespace IPAddressLogAnalyzer.Services
         /// <returns></returns>
         /// <exception cref="FileNotFoundException">Исключение, если нужный файл по заданному пути не найден</exception>
         /// <exception cref="ArgumentException"> Исключение, если в метод для параметра передается некорректное значение</exception>
-        public async Task<List<IP>> ReadToListAsync(CancellationToken cancellationToken)
+        public async Task<Dictionary<IPAddress, int>> ReadAsync(CancellationToken cancellationToken)
         {
             ArgumentException.ThrowIfNullOrEmpty(_filePath);
 
@@ -43,8 +48,10 @@ namespace IPAddressLogAnalyzer.Services
                         ips.Add(new IP(IPAddress.Parse(lines[0].Trim()),
                             DateTime.ParseExact(lines[1], "yyyy-MM-dd HH:mm:ss", provider)));
                     }
-                }
-                return ips;
+                } 
+
+                var ipAddresses = _iPAddressFilterService.GetIPAddressesWithConfigurations(ips);
+                return ipAddresses;
             }
             throw new ArgumentException($"Не удалось найти файл: {_filePath}");
         }

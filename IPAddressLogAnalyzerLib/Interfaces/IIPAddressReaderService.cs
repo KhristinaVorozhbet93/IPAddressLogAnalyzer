@@ -1,9 +1,9 @@
-﻿using IPAddressLogAnalyzer.Entities;
+﻿using System.Net;
 
 namespace IPAddressLogAnalyzer.Interfaces
 {
     public interface IIPAddressReaderService
     {
-        Task<List<IP>> ReadToListAsync(CancellationToken cancellationToken);
+        Task<Dictionary<IPAddress,int>> ReadAsync(CancellationToken cancellationToken);
     }
 }

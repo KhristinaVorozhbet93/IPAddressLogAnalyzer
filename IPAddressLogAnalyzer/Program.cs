@@ -1,6 +1,8 @@
 ﻿using IPAddressLogAnalyzer.Configurations;
 using IPAddressLogAnalyzer.Configurations.Intefaces;
 using IPAddressLogAnalyzer.Interfaces;
+using IPAddressLogAnalyzer.Lib.Interfaces;
+using IPAddressLogAnalyzer.Lib.Services;
 using IPAddressLogAnalyzer.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,6 +32,13 @@ class Program
 
         var serviceProvider = new ServiceCollection()
             .AddScoped<IConfigurationParser, ConfigurationParser>()
+            .AddScoped<IIPAddressFilterService>(provider =>
+            {
+                var ipServiceS = provider.GetRequiredService<IConfigurationsProvider>();
+                var ipConfiguration = ipServiceS.GetIPConfiguration();
+                return new IPAddressFilterService
+                    (ipConfiguration.TimeStart, ipConfiguration.TimeEnd, ipConfiguration.AddressStart, ipConfiguration.AddressMask);
+            })
             .AddScoped<IConfigurationsProvider>(provider =>
                 new FileConfigurationsProvider(ipConfigSection, provider.GetRequiredService<IConfigurationParser>()))
             .AddScoped<IIPAddressWriterService>(provider =>
@@ -42,13 +51,19 @@ class Program
             {
                 var ipServiceS = provider.GetRequiredService<IConfigurationsProvider>();
                 var ipConfiguration = ipServiceS.GetIPConfiguration();
-                return new IPAddressFileReaderService(ipConfiguration.FileLog);
+                var ipFiltredService = provider.GetRequiredService<IIPAddressFilterService>();
+                return new IPAddressFileReaderService(ipConfiguration.FileLog, ipFiltredService);
             })
             //.AddScoped<IConfigurationsProvider>(provider =>
             //      new CommandLineConfigurationsProvider(args, provider.GetRequiredService<IConfigurationParser>()))
             // .AddScoped<IConfigurationsProvider>(provider =>
             //      new EnvironmentConfigurationsProvider(provider.GetRequiredService<IConfigurationParser>()))
-            .AddScoped<IPService>()
+            .AddScoped(provider =>
+            {
+                var ipAddressReaderService = provider.GetRequiredService<IIPAddressReaderService>();
+                var ipAddressRWriterService = provider.GetRequiredService<IIPAddressWriterService>();
+                return new IPService(ipAddressRWriterService, ipAddressReaderService);
+            })
             .BuildServiceProvider();
 
 
@@ -56,12 +71,12 @@ class Program
         var ipServiceS = serviceProvider.GetRequiredService<IConfigurationsProvider>();
         var ipConfiguration = ipServiceS.GetIPConfiguration();
 
-        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+        CancellationTokenSource cancellationTokenSource = new();
         CancellationToken cancellationToken = cancellationTokenSource.Token;
 
         var ipService = serviceProvider.GetRequiredService<IPService>();
-        await ipService.WriteIPAddressesWithConfigurations
-            (ipConfiguration.TimeStart, ipConfiguration.TimeEnd, ipConfiguration.AddressStart, ipConfiguration.AddressMask, cancellationToken);
+        var ips = await ipService.GetIPAddressesAsync(cancellationToken);
+        await ipService.AddIPAddressesAsync(ips, cancellationToken);
         Console.WriteLine("IP-адреса с заданными конфигурациями успешно записаны в файл");
     }
 }

@@ -35,7 +35,7 @@ namespace IPAddressLogAnalyzer.Tests
         {
             Dictionary<string, string> ips = new Dictionary<string, string>();
 
-            await _ipService.WriteIPAddressesWithConfigurations
+            await _ipService.AddIPAddressesAsync
                 (_ipConfiguration.TimeStart, 
                 _ipConfiguration.TimeEnd, _ipConfiguration.AddressStart, _ipConfiguration.AddressMask, default);
             using (StreamReader reader = new StreamReader(_ipConfiguration.FileOutput))
@@ -61,7 +61,7 @@ namespace IPAddressLogAnalyzer.Tests
         [Fact]
         public async Task GetIPAddressesInTimeInterval_should_be_return_single_value_and_contain_ip_192_168_1_4()
         {
-            var ipAddresses = await _iPAddressFileReaderService.ReadToListAsync(default);
+            var ipAddresses = await _iPAddressFileReaderService.ReadAsync(default);
             var filtredIPAddresses =
                 _ipService.GetIPAddressesInTimeInterval(ipAddresses, DateTime.Parse("2024-10-14 23:59:06"),
                 DateTime.Parse("2024-10-14 23:59:07"));
@@ -74,7 +74,7 @@ namespace IPAddressLogAnalyzer.Tests
         [Fact]
         public async Task GetIPAddressesWithCountTimeRequests_should_be_return_dictionary_which_contain_ip_5_227_242_72_and_count_time_requests_2()
         {
-            var ipAddresses = await _iPAddressFileReaderService.ReadToListAsync(default);
+            var ipAddresses = await _iPAddressFileReaderService.ReadAsync(default);
             var filtredIPAddresses = _ipService.GetIPAddressesWithCountTimeRequests(ipAddresses);
 
             filtredIPAddresses.Should().NotBeNull();
@@ -85,7 +85,7 @@ namespace IPAddressLogAnalyzer.Tests
         [Fact]
         public async Task GetRangeIPAddresses_should_be_return__dictionary_which_contain_ip_192_168_1_1_and_count_time_requests_1()
         {
-            var ipAddresses = await _iPAddressFileReaderService.ReadToListAsync(default);
+            var ipAddresses = await _iPAddressFileReaderService.ReadAsync(default);
             var ipAddressesDictionary =
                 _ipService.GetIPAddressesWithCountTimeRequests(ipAddresses);
             var filtredIPAddresses = _ipService.GetRangeIPAddresses
